@@ -1,18 +1,27 @@
-/* The CitiesController class is a NestJS controller that handles requests related to cities and uses
-the CitiesService to retrieve cities data. */
-
-import { Controller, Get, Injectable } from '@nestjs/common';
+import { Controller, Get, Injectable, HttpException, HttpStatus, Query, } from '@nestjs/common';
 import { CitiesService } from './cities.service';
 
-@Controller('cities')
+@Controller('api/cities')
 @Injectable()
 export class CitiesController {
 
   constructor(private readonly citiesService: CitiesService) {}
 
   @Get()
-  getCities() {
-    const cities = this.citiesService.getCities();
+  getCities() { 
+    return this.citiesService.getCities();
+  }
+
+  @Get(':term') 
+  async searchCities(@Query('term') term: string) {
+    const cities = await this.citiesService.searchCities(term);
+    if (!cities) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
     return cities;
   }
+
 }
+
+
+

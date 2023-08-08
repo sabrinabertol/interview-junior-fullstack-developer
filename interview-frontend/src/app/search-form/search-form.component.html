@@ -1,0 +1,7 @@
+<input type="text" #searchBox (keyup)="search(searchBox.value)">
+
+<ul>
+  <li *ngFor="let city of cities">
+    {{city.cityName}}
+  </li>
+</ul>

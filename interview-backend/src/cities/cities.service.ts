@@ -1,24 +1,38 @@
-/* The `CitiesService` class is an injectable service that provides a method to read and parse a JSON
-file containing cities data. */
-
 import { Injectable } from '@nestjs/common';
-import { readFile } from 'fs';
-import { Cities } from './cities.model';
+import * as fs from 'fs';
+import { Observable, of } from 'rxjs';
+
+export interface City {
+  cityName: string;
+  uuid: string;
+  count: number;
+}
 
 @Injectable()
 export class CitiesService {
-  async getCities(): Promise<Cities[]> {
-    return new Promise((resolve, reject) => {
-      readFile('./../cities.json', (err, data) => {
-        
-        if (err) {
-          reject(err);
-        }
-        const dataStr = data.toString(); 
-        const cities = JSON.parse(dataStr);      
-        resolve(cities);       
-      });
-    });
+
+  private cities: City[] = [];
+
+  constructor() {
+    this.cities = JSON.parse(fs.readFileSync('./../cities.json', 'utf8'));
+  }
+ 
+  getCities(): City[] {
+    return this.cities;
+  }
+
+  getCity(cityName: string): City { 
+    return this.cities.find(c => c.cityName === cityName);
+  }
+
+
+  searchCities(term: string): Observable<City[]> {
+    const filtered = this.cities.filter(c => 
+      c.cityName.toLowerCase().includes(term.toLowerCase())
+    );
+
+    const results = filtered.slice(0, 5);
+    return of(results);
   }
 
 }
